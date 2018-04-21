@@ -1,6 +1,6 @@
 var express = require("express");
 var bodyParser = require("body-parser");
-var routes = require("./routes/workflowRoutes.js");
+var routes = require("./public/routes/workflowRoutes.js");
 var app = express();
 
 app.use(bodyParser.json());
