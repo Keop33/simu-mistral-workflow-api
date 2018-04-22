@@ -1,0 +1,29 @@
+---
+version: '2.0'
+
+workflow_1:
+  description: Creating multiple virtual servers using "with-items".
+
+  input:
+    - vm_names
+    - image_ref
+    - flavor_ref
+
+  output:
+    vm_ids: <% $.vm_ids %>
+
+  tasks:
+    create_servers:
+      with-items: vm_name in <% $.vm_names %>
+      action: nova.servers_create name=<% $.vm_name %> image=<% $.image_ref %> flavor=<% $.flavor_ref %>
+      publish:
+        vm_ids: <% task(create_servers).result.id %>
+      on-success:
+        - wait_for_servers
+
+    wait_for_servers:
+      with-items: vm_id in <% $.vm_ids %>
+      action: nova.servers_find id=<% $.vm_id %> status='ACTIVE'
+      retry:
+        delay: 5
+        count: <% $.vm_names.len() * 10 %>
